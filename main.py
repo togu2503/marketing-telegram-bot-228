@@ -1,4 +1,5 @@
 import telebot
+from telebot import types
 import os
 import time
 import logging
@@ -41,7 +42,12 @@ class Session(db.Model):
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
-    bot.reply_to(message, message)
+    markup = types.ReplyKeyboardMarkup(row_width=2)
+    itembtn1 = types.KeyboardButton('a')
+    itembtn2 = types.KeyboardButton('v')
+    itembtn3 = types.KeyboardButton('d')
+    markup.add(itembtn1, itembtn2, itembtn3)
+    bot.send_message(message.chat_id, "Choose one letter:", reply_markup=markup)
 
 
 @server.route(f"/{BOT_ENDPOINT}", methods=['POST'])
