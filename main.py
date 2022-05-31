@@ -9,7 +9,7 @@ server = Flask(__name__)
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
-    bot.reply_to(message, 'welcome')
+    bot.reply_to(message, 'Welcome with webhook!')
 
 @server.route(f"/{BOT_TOKEN}", methods=["POST"])
 def redirect_message():
