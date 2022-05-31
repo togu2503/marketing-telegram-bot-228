@@ -1,12 +1,25 @@
 import telebot
+import os
 import time
+from flask import Flask, request
+from config import *
 
-bot_token = "5520828799:AAHVMscC9OJuKIKS1IxEAsVHxWFkui6E-G8"
+bot = telebot.TeleBot(token=BOT_TOKEN)
+server = Flask(__name__)
 
-bot = telebot.TeleBot(token=bot_token)
-
-@bot.message_handlers(commands=['start'])
+@bot.message_handler(commands=['start'])
 def send_welcome(message):
-    bot.reply_to(message, "welcome")
+    bot.reply_to(message, 'welcome')
+
+@server.route(f"/{BOT_TOKEN}", methods=["POST"])
+def redirect_message():
+    json = request.get_data().decode("utf-8")
+    update = telebot.types.Update.de_json(json)
+    bot.process_new_updates([update])
+    return "ok", 200
 
 bot.polling()
+if __name__ == "__main__":
+    bot.remove_webhook()
+    bot.set_webhook(url=APP_URL)
+    server.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
