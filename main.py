@@ -1,12 +1,15 @@
 import telebot
 import os
 import time
+import logging
 from flask import Flask, request
 from config import *
 
 bot = telebot.TeleBot(token=BOT_TOKEN)
 server = Flask(__name__)
-
+server.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
+logger = telebot.logger
+logger.setLevel(logging.DEBUG)
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
