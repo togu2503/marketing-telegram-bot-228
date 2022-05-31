@@ -136,7 +136,12 @@ def send_question(chat_id, question, num):
 
 
 def quiz_finished(session, chat_id):
-    bot.send_message(chat_id, text="You finished quiz! ")
+    menu_markup = types.ReplyKeyboardMarkup()
+    start_button = types.KeyboardButton("Start Quiz")
+    help_button = types.KeyboardButton("Help")
+    menu_markup.row(start_button)
+    menu_markup.row(help_button)
+    bot.send_message(chat_id, text="You finished quiz!", reply_markup=menu_markup)
     bot.send_message(chat_id, text="Your score: " + str(session.mark)+" / " + str(session.passed_questions))
     db.session.delete(session)
     db.session.commit()
