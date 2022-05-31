@@ -40,6 +40,7 @@ class Session(db.Model):
     user = db.Column(db.Integer)
     passed_questions = db.Column(db.Integer)
     current_question = db.Column(db.Integer)
+    topic = db.Column(db.Integer)
     mark = db.Column(db.Integer)
 
 
@@ -100,12 +101,15 @@ def text_commands(message):
 
     if "Start Quiz" in message.text:
         start_quiz_menu(message)
+        return
 
     if "Help" in message.text:
         get_help(message)
+        return
 
     if "Stop Quiz" in message.text:
         stop_quiz(message)
+        return
 
 
 def is_answer_callback(callback):
@@ -156,12 +160,18 @@ def user_answered(call):
 
     answer = Answer.query.filter_by(id=answer_id).first()
 
+
     if not answer:
         bot.send_message(call.message.chat.id, text="Something wrong =(")
 
     session = Session.query.filter_by(user=call.from_user.id).first()
 
     if not session:
+        return
+
+    question = Question.query.filter_by(topic=session.topic, id=session.current_question).first()
+
+    if not question:
         return
 
     if answer.correct:
@@ -173,7 +183,7 @@ def user_answered(call):
         quiz_finished(session, call.from_user.id)
         return
 
-    questions = Question.query.all()
+    questions = Question.query.filter_by(topic=session.topic).all()
     question = random.choice(questions)
     session.current_question = question.id
     db.session.commit()
@@ -204,7 +214,7 @@ def create_session(call):
     if len(questions):
         question = random.choice(questions)
 
-        session = Session(user=call.from_user.id, passed_questions=0, current_question=question.id, mark=0)
+        session = Session(user=call.from_user.id, passed_questions=0, current_question=question.id, mark=0, topic=quiz_id)
         db.session.add(session)
         db.session.commit()
 
@@ -225,8 +235,9 @@ def redirect_message():
     bot.process_new_updates([update])
     return "ok", 200
 
+bot.polling()
 
 if __name__ == "__main__":
     bot.remove_webhook()
-    bot.set_webhook(url=APP_URL)
-    server.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+    #bot.set_webhook(url=APP_URL)
+    #server.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
