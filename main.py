@@ -45,24 +45,35 @@ class Session(db.Model):
 
 @bot.message_handler(commands=['menu'])
 def show_current_menu(message):
-    inline_markup = types.InlineKeyboardMarkup()
-    inlinebtn1 = types.InlineKeyboardButton(text="Start Quiz")
-    inlinebtn1.callback_data = "/start_quiz"
-    inline_markup.add(inlinebtn1)
-    bot.send_message(message.chat.id, text="Choose one:", reply_markup=inline_markup)
+    menu_markup = types.ReplyKeyboardMarkup()
+    start_button = types.KeyboardButton("Start Quiz")
+    help_button = types.KeyboardButton("Help")
+    menu_markup.row(start_button)
+    menu_markup.row(help_button)
+    bot.send_message(message.chat.id, text="Choose one:", reply_markup=menu_markup)
+
+
+@bot.message_handler(commands="help")
+def get_help(message):
+    bot.send_message(message.chat.id, text="This is quiz bot.\n To start quiz you need to type /start\n To cancel current quiz type /stop")
 
 
 @bot.message_handler(commands=['stop'])
 def stop_quiz(message):
+    menu_markup = types.ReplyKeyboardMarkup()
+    start_button = types.KeyboardButton("Start Quiz")
+    help_button = types.KeyboardButton("Help")
+    menu_markup.row(start_button)
+    menu_markup.row(help_button)
 
     session = Session.query.filter_by(user=message.from_user.id).first()
     if session:
         db.session.delete(session)
         db.session.commit()
-        bot.send_message(message.chat.id, text="Quiz has been canceled")
+        bot.send_message(message.chat.id, text="Quiz has been canceled", reply_markup=menu_markup)
         return
 
-    bot.send_message(message.chat.id, text="You have not started quiz yet")
+    bot.send_message(message.chat.id, text="You have not started quiz yet", reply_markup=menu_markup)
 
 
 @bot.message_handler(commands=['start'])
@@ -77,11 +88,24 @@ def start_quiz_menu(message):
     topics = Topic.query.all()
 
     for topic in topics:
-        topicbtn = types.InlineKeyboardButton(topic.name)
-        topicbtn.callback_data = '{"quiz_id": ' + str(topic.id)+"}"
-        inline_markup.add(topicbtn)
+        topic_btn = types.InlineKeyboardButton(topic.name)
+        topic_btn.callback_data = '{"quiz_id": ' + str(topic.id)+"}"
+        inline_markup.add(topic_btn)
 
     bot.send_message(message.chat.id, text="Choose quiz:", reply_markup=inline_markup)
+
+
+@bot.message_handler(content_types="text")
+def text_commands(message):
+
+    if "Start Quiz" in message.text:
+        start_quiz_menu(message)
+
+    if "Help" in message.text:
+        get_help(message)
+
+    if "Stop Quiz" in message.text:
+        stop_quiz(message)
 
 
 def is_answer_callback(callback):
@@ -179,6 +203,13 @@ def create_session(call):
         db.session.add(session)
         db.session.commit()
 
+        menu_markup = types.ReplyKeyboardMarkup()
+        start_button = types.KeyboardButton("Stop Quiz")
+        help_button = types.KeyboardButton("Help")
+        menu_markup.row(start_button)
+        menu_markup.row(help_button)
+
+        bot.send_message(call.message.chat.id, "Quiz has been started", reply_markup=menu_markup)
         send_question(call.message.chat.id, question, session.passed_questions)
 
 
