@@ -3,17 +3,45 @@ import os
 import time
 import logging
 from flask import Flask, request
+from flask_sqlalchemy import SQLAlchemy
 from config import *
 
 bot = telebot.TeleBot(token=BOT_TOKEN)
 server = Flask(__name__)
 server.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
+db = SQLAlchemy(server)
 logger = telebot.logger
 logger.setLevel(logging.DEBUG)
 
+
+class Topic(db.Model):
+    id = db.Column(db.BigInteger().with_variant(db.Integer, "sqlite"),primary_key=True)
+    name = db.Column(db.String(80))
+
+
+class Question(db.Model):
+    id = db.Column(db.BigInteger().with_variant(db.Integer, "sqlite"),primary_key=True)
+    topic = db.Column(db.Integer)
+    question = db.Column(db.String(80))
+
+
+class Answer(db.Model):
+    id = db.Column(db.BigInteger().with_variant(db.Integer, "sqlite"), primary_key=True)
+    question = db.Column(db.Integer)
+    db.answer = db.Column(db.String(80))
+    db.correct = db.Column(db.Boolean)
+
+
+class Session(db.Model):
+    id = db.Column(db.BigInteger().with_variant(db.Integer, "sqlite"), primary_key=True)
+    user = db.Column(db.Integer)
+    passed_questions = db.Column(db.Integer)
+    current_question = db.Column(db.Integer)
+
+
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
-    bot.reply_to(message, 'Welcome with webhook!')
+    bot.reply_to(message, "Testing")
 
 
 @server.route(f"/{BOT_ENDPOINT}", methods=['POST'])
