@@ -18,7 +18,6 @@ def redirect_message():
     bot.process_new_updates([update])
     return "ok", 200
 
-bot.polling()
 if __name__ == "__main__":
     bot.remove_webhook()
     bot.set_webhook(url=APP_URL)
