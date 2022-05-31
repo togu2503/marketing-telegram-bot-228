@@ -41,7 +41,7 @@ class Session(db.Model):
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
-    bot.reply_to(message, "Testing")
+    bot.reply_to(message, message.user.id)
 
 
 @server.route(f"/{BOT_ENDPOINT}", methods=['POST'])
