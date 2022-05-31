@@ -13,7 +13,7 @@ def send_welcome(message):
     bot.reply_to(message, 'Welcome with webhook!')
 
 
-@server.route(f"/{}", methods=['POST'])
+@server.route(f"/{BOT_ENDPOINT}", methods=['POST'])
 def redirect_message():
     json = request.get_data().decode("utf-8")
     update = telebot.types.Update.de_json(json)
