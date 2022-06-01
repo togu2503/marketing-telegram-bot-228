@@ -205,6 +205,7 @@ def create_session(call):
 
     existed_session = Session.query.filter_by(user=call.from_user.id).first()
     if existed_session:
+        bot.send_message(call.message.chat.id, text=text="You have already started quiz")
         return
 
     data = json.loads(call.data)
