@@ -205,6 +205,7 @@ def is_topic_callback(callback):
 
 @bot.callback_query_handler(func=lambda call: is_topic_callback(call))
 def create_session(call):
+    bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id)
 
     existed_session = Session.query.filter_by(user=call.from_user.id).first()
     if existed_session:
@@ -216,7 +217,6 @@ def create_session(call):
 
     topic = Topic.query.filter_by(id=quiz_id).first()
 
-    bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id)
     bot.send_message(call.message.chat.id, text="Your topic: "+topic.name)
 
     questions = Question.query.filter_by(topic=quiz_id).all()
