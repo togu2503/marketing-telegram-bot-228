@@ -160,21 +160,23 @@ def user_answered(call):
 
     answer = Answer.query.filter_by(id=answer_id).first()
 
-
     if not answer:
         bot.send_message(call.message.chat.id, text="Something wrong =(")
 
     session = Session.query.filter_by(user=call.from_user.id).first()
 
     if not session:
+        bot.send_message(call.message.chat.id, text="You have not start quiz yet")
         return
 
     question = Question.query.filter_by(topic=session.topic, id=session.current_question).first()
 
     if not question:
+        bot.send_message(call.message.chat.id, text="This question will not count\n It is from another topic")
         return
 
     if question.id != session.current_question:
+        bot.send_message(call.message.chat.id, text="Stop cheating")
         return
 
     if answer.correct:
