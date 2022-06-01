@@ -202,6 +202,11 @@ def is_topic_callback(callback):
 
 @bot.callback_query_handler(func=lambda call: is_topic_callback(call))
 def create_session(call):
+
+    existed_session = Session.query.filter_by(user=call.from_user.id).first()
+    if existed_session:
+        return
+
     data = json.loads(call.data)
     quiz_id = int(data['quiz_id'])
 
@@ -215,6 +220,7 @@ def create_session(call):
         question = random.choice(questions)
 
         session = Session(user=call.from_user.id, passed_questions=0, current_question=question.id, mark=0, topic=quiz_id)
+
         db.session.add(session)
         db.session.commit()
 
