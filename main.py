@@ -169,7 +169,7 @@ def user_answered(call):
         bot.send_message(call.message.chat.id, text="You have not start quiz yet")
         return
 
-    question = Question.query.filter_by(topic=session.topic, id=session.current_question).first()
+    question = Question.query.filter_by(topic=session.topic, id=answer.question).first()
 
     if not question:
         bot.send_message(call.message.chat.id, text="This question will not count\n It is from another topic")
