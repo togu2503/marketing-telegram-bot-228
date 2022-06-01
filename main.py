@@ -174,6 +174,9 @@ def user_answered(call):
     if not question:
         return
 
+    if question.id != session.current_question:
+        return
+
     if answer.correct:
         session.mark += 1
 
